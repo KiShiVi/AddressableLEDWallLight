@@ -1,6 +1,6 @@
 # AddressableLEDWallLight
  Проект, посвященный авторской управляемоей светодиодной лампе
- ![Game](https://github.com/KiShiVi/AddressableLEDWallLight/tree/main/media/demo.gif)
+ ![Game](https://github.com/KiShiVi/AddressableLEDWallLight/blob/main/media/demo.gif)
 
 ## Комплектующие
 Схема устройства представлена в /PCB_AddressableLEDWallLight
