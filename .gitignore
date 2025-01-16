@@ -1,5 +1,25 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c,c++,visualstudiocode,platformio
-# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,visualstudiocode,platformio
+# Created by https://www.toptal.com/developers/gitignore/api/altium,c++,c,visualstudiocode,platformio
+# Edit at https://www.toptal.com/developers/gitignore?templates=altium,c++,c,visualstudiocode,platformio
+
+### Altium ###
+# Previews Folders
+**/__Previews/
+
+# History Folders
+**/History/*
+
+# Project Logs
+Project\ Logs*/
+
+# Project Outputs
+Project\ Outputs*/
+
+# Auto-conversion notices
+*.PcbDoc.htm
+
+# Access lock file for dbLib sources
+**/*.ldb
+
 
 ### C ###
 # Prerequisites
@@ -100,5 +120,5 @@ dkms.conf
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/c,c++,visualstudiocode,platformio
+# End of https://www.toptal.com/developers/gitignore/api/altium,c++,c,visualstudiocode,platformio
 /build
