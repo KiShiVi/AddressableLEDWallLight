@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Енотий светильник</title>
+    <style>
+	
+	
+	
+        body {
+            background: content-box radial-gradient(#00FFFF, #000000);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column; /* Вертикальное направление */
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .switch {
+            margin-top: 10px; /* Отступ сверху для переключателя */
+			margin-bottom: 10px; /* Отступ сверху для переключателя */
+            display: flex; /* Используем flexbox для выравнивания элементов */
+            align-items: center; /* Центрирование по вертикали */
+			font-weight: bold;
+        }
+        .switch input {
+            display: none; /* Скрыть стандартный чекбокс */
+        }
+        .switch-label {
+            cursor: pointer; /* Указатель курсора для кликабельного элемента */
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            background-color: #ccc;
+            border-radius: 34px; /* Скругление углов */
+            position: relative;
+            transition: background-color 0.2s; /* Плавный переход цвета */
+            margin: 0 10px; /* Отступы слева и справа */
+        }
+        .switch-label::before {
+            content: ""; /* Создание псевдоэлемента */
+            position: absolute; /* Позиционирование относительно родительского элемента */
+            width: 26px; /* Ширина ползунка */
+            height: 26px; /* Высота ползунка */
+            border-radius: 50%; /* Полный круг */
+            background-color: white; /* Цвет ползунка */
+            top: 4px; /* Отступ сверху */
+            left: 4px; /* Отступ слева */
+            transition: transform 0.2s; /* Плавный переход при движении ползунка */
+        }
+        .switch input:checked + .switch-label {
+            background-color: #4caf50; /* Цвет переключателя при включении */
+        }
+        .switch input:checked + .switch-label::before {
+            transform: translateX(26px); /* Движение ползунка при включении */
+        }
+		
+		.slider-container {
+		  margin-bottom: 20px;
+		}	
+
+		.slider-label {
+		  margin-bottom: 5px;
+		  font-weight: bold;
+		}
+		
+		.slider {
+		  -webkit-appearance: none;
+		  width: 30vh;
+		  height: 34px;
+		  border-radius: 50px;
+		  outline: none;
+		  opacity: 0.7;
+		  transition: opacity .2s;
+		  cursor: pointer;
+		}
+
+		.slider:hover {
+		  opacity: 1;
+		}
+
+		/* Градиенты для ползунков */
+		#hueSlider {
+		  background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
+		}
+
+		#saturationSlider {
+		  /* Градиент будет обновляться динамически */
+		}
+
+		#brightnessSlider {
+		  /* Градиент будет обновляться динамически */
+		}
+		
+		#speedSlider {
+			background: linear-gradient(to right, black, white);
+		}
+		
+		.dropdown {
+			margin-top: 20px; /* Отступ сверху */
+			margin-bottom: 20px; /* Отступ сверху */
+			display: flex; /* Flexbox для выравнивания */
+			align-items: center; /* Центрирование по вертикали */
+			color: white; /* Цвет текста */
+			font-family: Arial, sans-serif; /* Единый шрифт */
+			font-weight: bold;
+		}
+
+		.custom-select {
+			background-color: #008f6f; /* Фон выпадающего списка */
+			color: white; /* Цвет текста */
+			border: none; /* Убираем стандартную рамку */
+			border-radius: 50px; /* Скругленные углы */
+			padding: 5px; /* Внутренние отступы для удобства */
+			font-size: 16px; /* Размер шрифта */
+			outline: none; /* Убираем обводку при фокусе */
+			cursor: pointer; /* Курсор в виде руки */
+			appearance: none; /* Убираем стандартный вид браузера */
+			width: 20vh; /* Ширина выпадающего списка */
+			transition: background-color 0.2s; /* Плавный переход при изменении */
+			margin-left: 10px;
+			font-weight: bold;
+		}
+
+		/*.custom-select:hover {
+			background-color: #00ffff; /* Изменение фона при наведении */
+		}*/
+		
+		
+		
+    </style>
+</head>
+<body>
+
+
+
+	<!-- Заголовок -->
+    <h1>Управление енотием</h1> 
+	<!--------------->
+	
+	
+
+    <!-- Переключатель 1 - вкл/выкл светодиодную ленту -->
+    <div class="switch">
+        <span>Выключить</span>
+        <input type="checkbox" id="toggleSwitch1"> <!-- Первый переключатель -->
+        <label class="switch-label" for="toggleSwitch1"></label>
+        <span>Включить</span>
+    </div>
+	<!--------------------------------------------------->
+	
+	
+	
+	<!-- Выпадающий список режимов енотия -->
+	<div class="dropdown">
+		<label for="options">Выберите опцию:</label>
+		<select id="options" class="custom-select">
+			<option value="option1">Постоянный цвет</option>
+			<option value="option2">Плавная смена цвета</option>
+			<option value="option3">Языки пламени от краёв</option>
+			<option value="option4">Языки пламени от центра</option>
+			<option value="option5">Конфетти</option>
+			<option value="option6">Конфетти RGBY</option>
+			<option value="option7">Радуга</option>
+    </select>
+	</div>
+	<!-------------------------------------->
+	
+	
+	
+	<!-- Контейнеры для ползунков выбора цвета -->
+	<div class="slider-container">
+	<div class="slider-label">Оттенок (Hue)</div>
+	<input type="range" min="0" max="360" value="180" class="slider" id="hueSlider" step="1">
+	</div>
+
+	<div class="slider-container">
+	<div class="slider-label">Насыщенность (Saturation)</div>
+	<input type="range" min="0" max="100" value="100" class="slider" id="saturationSlider" step="1">
+	</div>
+
+	<div class="slider-container">
+	<div class="slider-label">Яркость (Brightness)</div>
+	<input type="range" min="0" max="100" value="100" class="slider" id="brightnessSlider" step="1">
+	</div>
+	<!------------------------------------------->
+	
+	
+	
+	<!-- Ползунок скорости -->
+	<div class="slider-container">
+	<div class="slider-label">Скорость</div>
+	<input type="range" min="0" max="100" value="50" class="slider" id="speedSlider" step="1">
+	</div>
+	<!----------------------->
+	
+	
+	
+</body>
+    <script>
+		
+		
+		
+		// --- Глобавльные переменные ---
+		let lastColorChangeTime 	= 0; 		// Время последнего изменения цвета
+		const colorChangeDelay 		= 5; 		// Задержка изменения цвета мс
+		
+		let lastSpeedChangeTime 	= 0; 		// Время последнего изменения скорости
+		const speedChangeDelay 		= 5; 		// Задержка изменения скорости мс
+		// ------------------------------
+		
+		
+		
+		// --- Получаем элементы ползунков и отображения ---
+		const onOfCheckBox 		= document.getElementById('toggleSwitch1');
+		const modeDropBox 		= document.getElementById('options');
+		const hueSlider 		= document.getElementById('hueSlider');
+		const saturationSlider 	= document.getElementById('saturationSlider');
+		const brightnessSlider 	= document.getElementById('brightnessSlider');
+		const colorDisplay 		= document.getElementById('color-display');
+		const selectedColorText = document.getElementById('selected-color');
+		// -------------------------------------------------
+		
+		
+		
+		// --- Инициализация страницы / обработчиков событий ---
+        function init() {
+            // - Переключатель 1-
+            onOfCheckBox.addEventListener('change', (event) => toggleSwitch(event, 'on')); // Команда on
+			// ------------------
+			
+			// - Выбор режима - DropBox -
+			modeDropBox.addEventListener('change', 			(event) => dropBoxValueChanged(event));
+			// --------------------------
+			
+			// - Ползунки HSV -
+			//hueSlider.addEventListener('input', 			() => colorChange(1));
+			//saturationSlider.addEventListener('input', 		() => colorChange(1));
+			//brightnessSlider.addEventListener('input', 		() => colorChange(1));
+			
+			hueSlider.addEventListener('change', 			() => colorChange(0));
+			saturationSlider.addEventListener('change', 	() => colorChange(0));
+			brightnessSlider.addEventListener('change', 	() => colorChange(0));
+			
+			updateHSVGradients();
+			// ----------------
+			
+			// - Ползунок скорости -
+			//speedSlider.addEventListener('input', 			(event) => speedValueChanged(event, 1));
+			speedSlider.addEventListener('change', 			(event) => speedValueChanged(event, 0));
+			// ---------------------
+			updateStatus();
+        }
+		// -----------------------------------------------------
+		
+		
+		
+		// --- Обработчик события изменения состояния переключателя ---
+        function toggleSwitch(event, commandName) {
+            const state = event.target.checked ? '1' : '0'; 	// Устанавливаем состояние
+            const command = `${commandName}=${state}`; 			// Формируем команду
+            sendCommand(`toggle_changed`, command); 			// Отправляем команду на ESP32
+        }
+		// ------------------------------------------------------------
+		
+		
+		
+		// --- Обработчик события изменения выбранного элемента в DropBox ---
+        function dropBoxValueChanged(event) {
+            const value = event.target.selectedIndex;
+            const command = `mode=${value}`; 					// Формируем команду
+            sendCommand(`mode_changed`, command); 				// Отправляем команду на ESP32
+        }
+		// ------------------------------------------------------------
+		
+		
+		
+		// --- Обработчик события изменения цвета ---
+        function colorChange(useTimeout) {
+			const now = Date.now();
+		
+			const h = parseInt(hueSlider.value);
+			const s = parseInt(saturationSlider.value);
+			const v = parseInt(brightnessSlider.value);
+			
+			const RGB = hsv_to_RGB(h, s, v);
+			const intRGB = rgbToInt24(RGB.r, RGB.g, RGB.b);
+			
+			document.body.style.background = `content-box radial-gradient(#${intRGB}, #000000)`;	// Обновить градиент фона
+			updateHSVGradients();																// Обновить градиенты ползунков
+			//colorDisplay.style.backgroundColor = '#' + intRGB;								// Обновить цвет в круге
+			//selectedColorText.textContent = `Выбранный цвет: #${intRGB}`;						// Обновить текст выбранного цвета
+			
+			if (useTimeout == 1) {
+				if (now - lastColorChangeTime < colorChangeDelay) {		// Проверяем, прошло ли время задержки с последнего изменения цвета
+					return; 											// Если нет, выходим из функции
+				}
+			}
+
+            lastColorChangeTime = now; 								// Обновляем время последнего изменения цвета
+            const command = `color=${encodeURIComponent(intRGB)}`; 	// Формируем команду
+            sendCommand(`color_changed`, command); 									// Отправляем цвет на ESP32
+        }
+		// ------------------------------------------
+		
+		
+		
+		// --- Обработчик события изменения состояния переключателя ---
+        function speedValueChanged(event, useTimeout) {
+			const now = Date.now();
+			
+			if (useTimeout == 1) {
+				if (now - lastSpeedChangeTime < speedChangeDelay) {		// Проверяем, прошло ли время задержки с последнего изменения скорости
+					return; 											// Если нет, выходим из функции
+				}
+			}
+			lastSpeedChangeTime = now; 									// Обновляем время последнего изменения скорости
+            const value = parseInt(event.target.value);
+            const command = `speed=${value}`; 							// Формируем команду
+            sendCommand(`speed_changed`, command); 						// Отправляем команду на ESP32
+        }
+		// ------------------------------------------------------------
+		
+		
+		
+		// --- Функция перевода HSV цвета в RGB ---
+		function hsv_to_RGB(H, S, V) {
+			let r, g, b;
+
+			// Приводим H, S, V к диапазону [0, 1]
+			let s = S / 100;
+			let v = V / 100;
+			let c = v * s; // chroma
+			let x = c * (1 - Math.abs((H / 60) % 2 - 1));
+			let m = v - c;
+
+			if (H >= 0 && H < 60) {
+				r = c; g = x; b = 0;
+			} else if (H >= 60 && H < 120) {
+				r = x; g = c; b = 0;
+			} else if (H >= 120 && H < 180) {
+				r = 0; g = c; b = x;
+			} else if (H >= 180 && H < 240) {
+				r = 0; g = x; b = c;
+			} else if (H >= 240 && H < 300) {
+				r = x; g = 0; b = c;
+			} else {
+				r = c; g = 0; b = x;
+			}
+
+			// Преобразуем RGB в диапазон [0, 255]
+			r = Math.round((r + m) * 255);
+			g = Math.round((g + m) * 255);
+			b = Math.round((b + m) * 255);
+
+			return { r, g, b };
+		}
+		// ----------------------------------------
+		
+		
+		// --- Перевод RGB цвета к одной переменной ---
+		function rgbToInt24(r, g, b) {
+			return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+		}
+		// --------------------------------------------
+	
+	
+	
+        // Функция отправки команды на ESP32
+        function sendCommand(commandName, command) {
+            const url = `/${commandName}?${command}`; // Формируем URL с командой
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Сеть не доступна');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Команда отправлена:', data);
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+        }
+	
+	
+		// --- Обновить градиенты ползунков выбора цвета ---
+		function updateHSVGradients() {
+			const hue = hueSlider.value; // Значение оттенка (hue)
+			const saturation = saturationSlider.value; // Значение насыщенности (saturation)
+			const brightness = brightnessSlider.value; // Значение яркости (value)
+			
+			const saturationSliderRGB = hsv_to_RGB(hue, 100, brightness);
+			
+			// Градиент для слайдера насыщенности (от серого до выбранного оттенка с 100% яркостью)
+			saturationSlider.style.background = `linear-gradient(to right, 
+				rgb(128, 128, 128), 
+				rgb(${saturationSliderRGB.r}, ${saturationSliderRGB.g}, ${saturationSliderRGB.b})
+			)`;
+			
+			const brightnessSliderRGB = hsv_to_RGB(hue, saturation, 100);
+			
+			// Градиент для слайдера яркости (от черного до выбранного оттенка при максимальной насыщенности)
+			brightnessSlider.style.background = `linear-gradient(to right, 
+				rgb(0, 0, 0), 
+				rgb(${brightnessSliderRGB.r}, ${brightnessSliderRGB.g}, ${brightnessSliderRGB.b})
+			)`;
+		}
+		// -------------------------------------------------
+		
+		// --- Функция для обновления состояния элементов на странице ---
+		function updateStatus() {
+			fetch('/get_status') // Запрашиваем текущий статус с сервера
+				.then(response => response.json())
+				.then(data => {
+					// Обновляем состояние переключателей и слайдеров на основе полученных данных
+					onOfCheckBox.checked = data.power === '1';
+					modeDropBox.selectedIndex = data.mode;
+					hueSlider.value = data.hue;
+					saturationSlider.value = data.saturation;
+					brightnessSlider.value = data.brightness;
+					speedSlider.value = data.speed;
+					
+					// Обновить отображение цвета и градиентов
+					colorChange(1);
+				})
+				.catch(error => console.error('Ошибка обновления:', error));
+		}
+
+		// Периодическое выполнение функции обновления (каждые 0.2 секунды)
+		//setInterval(updateStatus, 200);
+		// --------------------------------------------------------------
+
+        // --- Вызываем функцию инициализации после загрузки страницы ---
+        window.onload = init;
+		
+		// --------------------------------------------------------------
+		
+		
+		
+    </script>
