@@ -202,7 +202,18 @@
 </body>
     <script>
 		
-		
+		// ГЛАВНОЕ ДОБАВЛЕНИЕ: получаем токен из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const TOKEN = urlParams.get('token');
+
+        // Если токена нет — блокируем всё
+        if (!TOKEN) {
+            document.body.innerHTML = `
+                <h1 style="color: red; text-align: center; padding: 50px;">
+                    Ошибка доступа
+                </h1>`;
+            throw new Error("Нет токена в URL");
+        }
 		
 		// --- Глобавльные переменные ---
 		let lastColorChangeTime 	= 0; 		// Время последнего изменения цвета
@@ -369,9 +380,28 @@
 	
 	
 	
-        // Функция отправки команды на ESP32
+        //// Функция отправки команды на ESP32
+        //function sendCommand(commandName, command) {
+        //    const url = `/${commandName}?${command}`; // Формируем URL с командой
+        //    
+        //    fetch(url)
+        //        .then(response => {
+        //            if (!response.ok) {
+        //                throw new Error('Сеть не доступна');
+        //            }
+        //            return response.json();
+        //        })
+        //        .then(data => {
+        //            console.log('Команда отправлена:', data);
+        //        })
+        //        .catch(error => {
+        //            console.error('Ошибка:', error);
+        //        });
+        //}
+		
+		        // Функция отправки команды на ESP32
         function sendCommand(commandName, command) {
-            const url = `/${commandName}?${command}`; // Формируем URL с командой
+            const url = `/${commandName}?${command}&token=${TOKEN}`; // Формируем URL с командой
             
             fetch(url)
                 .then(response => {
@@ -385,6 +415,7 @@
                 })
                 .catch(error => {
                     console.error('Ошибка:', error);
+					alert('Ошибка связи или неверный токен!');
                 });
         }
 	
@@ -413,10 +444,32 @@
 		}
 		// -------------------------------------------------
 		
+		//// --- Функция для обновления состояния элементов на странице ---
+		//function updateStatus() {
+		//	fetch('/get_status') // Запрашиваем текущий статус с сервера
+		//		.then(response => response.json())
+		//		.then(data => {
+		//			// Обновляем состояние переключателей и слайдеров на основе полученных данных
+		//			onOfCheckBox.checked = data.power === '1';
+		//			modeDropBox.selectedIndex = data.mode;
+		//			hueSlider.value = data.hue;
+		//			saturationSlider.value = data.saturation;
+		//			brightnessSlider.value = data.brightness;
+		//			speedSlider.value = data.speed;
+		//			
+		//			// Обновить отображение цвета и градиентов
+		//			colorChange(1);
+		//		})
+		//		.catch(error => console.error('Ошибка обновления:', error));
+		//}
+		
 		// --- Функция для обновления состояния элементов на странице ---
 		function updateStatus() {
-			fetch('/get_status') // Запрашиваем текущий статус с сервера
-				.then(response => response.json())
+			fetch(`/get_status?token=${TOKEN}`) // Запрашиваем текущий статус с сервера
+				.then(response => {
+                    if (!response.ok) throw new Error('Плохой токен');
+                    return response.json();
+                })
 				.then(data => {
 					// Обновляем состояние переключателей и слайдеров на основе полученных данных
 					onOfCheckBox.checked = data.power === '1';

@@ -29,6 +29,7 @@
 
 #define NUM_LEDS 284    ///< Количество светодиодов на ленте
 
+#define VALID_TOKEN "" ///< Токен для HTTP страницы
 #define WIFI_SSID ""      ///< SSID WiFi точки
 #define WIFI_PASSWORD ""    ///< Pass Wifi точки
 #define MAXIMUM_RETRY 20            ///< Максимальное количество переподключений к точке
@@ -102,6 +103,7 @@ uint8_t mode_changed = 0;   ///< Переменная, определяющая 
 void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB);    ///< Функция получения цвета по температуре огня
 void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b);                                              ///< Функция перевода HSV в RGB
 void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v);                                              ///< Функция перевода RGB в HSV
+static esp_err_t check_token(httpd_req_t *req);     ///< Проверка токена HTTP
 //  -------------------------------
 
 //  --- Функции инициализации ---
@@ -1048,6 +1050,10 @@ esp_err_t index_handler(httpd_req_t *req) {
 
 esp_err_t color_changed_handler(httpd_req_t *req)
 {
+    if (check_token(req) != ESP_OK) {
+        return ESP_OK;
+    }
+
     uint8_t buf[256];
     size_t buf_len;
     buf_len = httpd_req_get_url_query_len(req) + 1;
@@ -1077,6 +1083,10 @@ esp_err_t color_changed_handler(httpd_req_t *req)
 
 esp_err_t onOff_changed_handler(httpd_req_t *req)
 {
+    if (check_token(req) != ESP_OK) {
+        return ESP_OK;
+    }
+
     uint8_t buf[256];
     size_t buf_len;
     buf_len = httpd_req_get_url_query_len(req) + 1;
@@ -1096,6 +1106,10 @@ esp_err_t onOff_changed_handler(httpd_req_t *req)
 
 esp_err_t mode_changed_handler(httpd_req_t *req)
 {
+    if (check_token(req) != ESP_OK) {
+        return ESP_OK;
+    }
+
     uint8_t buf[256];
     size_t buf_len;
     buf_len = httpd_req_get_url_query_len(req) + 1;
@@ -1117,6 +1131,10 @@ esp_err_t mode_changed_handler(httpd_req_t *req)
 
 esp_err_t speed_changed_handler(httpd_req_t *req)
 {
+    if (check_token(req) != ESP_OK) {
+        return ESP_OK;
+    }
+
     uint8_t buf[256];
     size_t buf_len;
     buf_len = httpd_req_get_url_query_len(req) + 1;
@@ -1136,6 +1154,10 @@ esp_err_t speed_changed_handler(httpd_req_t *req)
 
 esp_err_t get_status_handler(httpd_req_t *req)
 {
+    if (check_token(req) != ESP_OK) {
+        return ESP_OK;
+    }
+
     // Создаем JSON строку для ответа
     char response[256];
     uint16_t currentH;
@@ -1177,17 +1199,20 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
         ESP_LOGI(tag, "WiFi started, connecting to AP...");
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < MAXIMUM_RETRY) {
-            s_retry_num++;
-            ESP_LOGI(tag, "Retrying to connect to the AP (attempt %d/%d)...", s_retry_num, MAXIMUM_RETRY);
-            esp_wifi_connect();
-        } else {
-            ESP_LOGE(tag, "Failed to connect after %d attempts. Restarting WiFi stack...", MAXIMUM_RETRY);
-            s_retry_num = 0; // Сброс счетчика
-            esp_wifi_stop();
-            vTaskDelay(pdMS_TO_TICKS(500)); // Задержка перед перезапуском
-            esp_wifi_start();
-        }
+        // if (s_retry_num < MAXIMUM_RETRY) {
+        //     s_retry_num++;
+        //     ESP_LOGI(tag, "Retrying to connect to the AP (attempt %d/%d)...", s_retry_num, MAXIMUM_RETRY);
+        //     esp_wifi_connect();
+        // } else {
+        //     ESP_LOGE(tag, "Failed to connect after %d attempts. Restarting WiFi stack...", MAXIMUM_RETRY);
+        //     s_retry_num = 0; // Сброс счетчика
+        //     esp_wifi_stop();
+        //     vTaskDelay(pdMS_TO_TICKS(500)); // Задержка перед перезапуском
+        //     esp_wifi_start();
+        // }
+        ESP_LOGI(tag, "WiFi disconnected — reconnecting...");
+        esp_wifi_connect();  // Просто переподключаемся бесконечно
+        s_retry_num = 0;
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(tag, "Got IP: %s", ip4addr_ntoa(&event->ip_info.ip));
@@ -1341,4 +1366,30 @@ void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_
 
     *h = (uint16_t)h_local % 360;
 }
+
+
+
+static esp_err_t check_token(httpd_req_t *req)
+{
+    char token_buf[128] = {0};
+    
+    // Получаем весь query string (например: "color=FF00FF&token=abc123")
+    if (httpd_req_get_url_query_str(req, token_buf, sizeof(token_buf)) == ESP_OK)
+    {
+        char val[128];
+        httpd_query_key_value(token_buf, "token", val, sizeof(val));
+        
+        ESP_LOGI(tag, "TOKEN: %s", val);
+
+        if (strcmp(val, VALID_TOKEN) == 0)
+            return ESP_OK;  // Токен правильный
+    }
+
+    // Если токена нет или он неверный — 403
+    httpd_resp_set_status(req, "403 Forbidden");
+    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_send(req, "Bad or missing token", HTTPD_RESP_USE_STRLEN);
+    return ESP_FAIL;
+}
+
 #pragma endregion
