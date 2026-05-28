@@ -90,9 +90,9 @@ static led_strip_handle_t led_strip_handle;                 ///< Хэндл св
 ///< Переменная устройства
 Device device = {
     .is_On                          = 0,
-    .device_mode                    = STATIC_LED_STRIP_MODE,
-    .device_color                   = {0, 255, 255},
-    .speed                          = 50,
+    .device_mode                    = FIRE_ON_THE_EDGES_LED_STRIP_MODE,
+    .device_color                   = {255, 68, 0},
+    .speed                          = 30,
     .encoderMode                    = ENCODER_CHANGE_MODE,
     .lastChangeTime                 = 0
 };
@@ -100,9 +100,9 @@ uint8_t mode_changed = 0;   ///< Переменная, определяющая 
 //  ------------------
 
 //  --- Вспомогательные функции ---
-void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB);    ///< Функция получения цвета по температуре огня
-void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b);                                              ///< Функция перевода HSV в RGB
-void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v);                                              ///< Функция перевода RGB в HSV
+IRAM_ATTR void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB);    ///< Функция получения цвета по температуре огня
+IRAM_ATTR void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b);                                              ///< Функция перевода HSV в RGB
+IRAM_ATTR void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v);                                              ///< Функция перевода RGB в HSV
 static esp_err_t check_token(httpd_req_t *req);     ///< Проверка токена HTTP
 //  -------------------------------
 
@@ -151,8 +151,8 @@ void app_main(void)
 
     //  --- Создание задач ---
     xTaskCreatePinnedToCore (vTestingLedTask,            "vTestingLedTask",          2048,          NULL,   1,      NULL,      0);
-    xTaskCreatePinnedToCore (vLedStripTask,              "vLedStripTask",            65536,         NULL,   10,     NULL,      1);
-    xTaskCreatePinnedToCore (vEncoderTask,               "vEncoderTask",             8192,          NULL,   5,      NULL,      0);
+    xTaskCreatePinnedToCore (vLedStripTask,              "vLedStripTask",            65536,         NULL,   5,      NULL,      1);
+    xTaskCreatePinnedToCore (vEncoderTask,               "vEncoderTask",             8192,          NULL,   3,      NULL,      0);
     //  ----------------------
 
 }
@@ -245,7 +245,8 @@ void vTestingLedTask(void* pvParameters)
 
 
 void vLedStripTask(void* pvParameters)
-{
+{   
+    vTaskDelay(pdMS_TO_TICKS(500));
     ESP_LOGI(tag, "vLedStripTask task started!");
 
     configure_led();                                                        // Инициализация светодиодной ленты
@@ -297,9 +298,12 @@ void vLedStripTask(void* pvParameters)
             if (mode_changed)
             {
                 mode_changed = 0;
-                device.device_color.r = 0;
-                device.device_color.g = 238;
+                device.device_color.r = 255;
+                device.device_color.g = 255;
                 device.device_color.b = 255;
+                // device.device_color.r = 0;
+                // device.device_color.g = 238;
+                // device.device_color.b = 255;
             } 
             const float transitionK = 0.05;
 
@@ -1031,8 +1035,11 @@ static void configure_led(void)
     .led_pixel_format = LED_PIXEL_FORMAT_GRB
   };
   led_strip_rmt_config_t rmt_config = {
+    .clk_src = RMT_CLK_SRC_DEFAULT,
+    .flags.with_dma = false,             // <-- ВКЛЮЧИТЕ DMA (ОЧЕНЬ ВАЖНО)
+    .mem_block_symbols = 2048,         // <-- УВЕЛИЧЬТЕ С 512 ДО 1024 ИЛИ 2048
     .mem_block_symbols = 512,
-    .resolution_hz = 10 * 1000 * 1000,      //10MHz
+    .resolution_hz = 10 * 1000 * 1000      //10MHz
   };
   ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip_handle));
   led_strip_clear(led_strip_handle);
@@ -1223,7 +1230,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
 
 
 #pragma region HelpfulFunc
-void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB) 
+IRAM_ATTR void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB) 
 {
     // Масштабируем значение от 0-255 до 0-240
     temp = (temp * 240) / 255;
@@ -1270,7 +1277,7 @@ void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t base
 
 
 
-void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b)
+IRAM_ATTR void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b)
 {
     uint8_t region, remainder, p, q, t;
 
@@ -1328,7 +1335,7 @@ void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_
 
 
 
-void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v)
+IRAM_ATTR void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v)
 {
     uint8_t rgbMin, rgbMax, delta;
     float h_local;

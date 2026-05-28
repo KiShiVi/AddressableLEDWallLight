@@ -13,7 +13,7 @@
     ],
     "idf.portWin": "COM3",
     "idf.pythonBinPathWin": "C:\\Users\\KiShIVi\\.espressif\\python_env\\idf5.2_py3.11_env\\Scripts\\python.exe",
-    "idf.toolsPathWin": "C:\\Users\\KiShIVi\\.espressif",
+    "idf.toolsPathWin": "C:\\Users\\kishivi\\.espressif",
     "idf.flashType": "UART",
     "files.associations": {
         "gpio.h": "c",
@@ -37,5 +37,7 @@
         "cstdint": "c",
         "esp_http_server.h": "c",
         "compare": "c"
-    }
+    },
+    "idf.pythonInstallPath": "C:\\Users\\KiShIVi\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.monitorPort": "COM3"
 }
