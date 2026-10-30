@@ -942,7 +942,7 @@ void init_wifi() {
     wifi_config.sta.failure_retry_cnt = 255;
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
 
     ESP_ERROR_CHECK(esp_netif_dhcpc_stop(netif));
 
@@ -1037,7 +1037,6 @@ static void configure_led(void)
   led_strip_rmt_config_t rmt_config = {
     .clk_src = RMT_CLK_SRC_DEFAULT,
     .flags.with_dma = false,             // <-- ВКЛЮЧИТЕ DMA (ОЧЕНЬ ВАЖНО)
-    .mem_block_symbols = 2048,         // <-- УВЕЛИЧЬТЕ С 512 ДО 1024 ИЛИ 2048
     .mem_block_symbols = 512,
     .resolution_hz = 10 * 1000 * 1000      //10MHz
   };
@@ -1222,7 +1221,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
         s_retry_num = 0;
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        ESP_LOGI(tag, "Got IP: %s", ip4addr_ntoa(&event->ip_info.ip));
+        ESP_LOGI(tag, "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0; // Сброс счетчика при успешном подключении
     }
 }
@@ -1230,7 +1229,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id
 
 
 #pragma region HelpfulFunc
-IRAM_ATTR void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB) 
+void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, uint8_t baseB, uint8_t *outR, uint8_t *outG, uint8_t *outB) 
 {
     // Масштабируем значение от 0-255 до 0-240
     temp = (temp * 240) / 255;
@@ -1277,7 +1276,7 @@ IRAM_ATTR void getColorByFireTemp(uint8_t temp, uint8_t baseR, uint8_t baseG, ui
 
 
 
-IRAM_ATTR void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b)
+void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t* g, uint8_t* b)
 {
     uint8_t region, remainder, p, q, t;
 
@@ -1335,7 +1334,7 @@ IRAM_ATTR void HSV_to_RGB(uint16_t h, uint8_t s, uint8_t v, uint8_t* r, uint8_t*
 
 
 
-IRAM_ATTR void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v)
+void RGB_to_HSV(uint8_t r, uint8_t g, uint8_t b, uint16_t* h, uint8_t* s, uint8_t* v)
 {
     uint8_t rgbMin, rgbMax, delta;
     float h_local;

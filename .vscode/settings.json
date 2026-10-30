@@ -39,5 +39,7 @@
         "compare": "c"
     },
     "idf.pythonInstallPath": "C:\\Users\\KiShIVi\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
-    "idf.monitorPort": "COM3"
+    "idf.monitorPort": "/dev/ttyUSB0",
+    "idf.currentSetup": "/home/kishivi/.espressif/v6.1/esp-idf",
+    "idf.port": "/dev/ttyUSB0"
 }

@@ -102,7 +102,9 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
   return ESP_OK;
 }
 //-----------------------------------------------------------
-static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state)
+static IRAM_ATTR size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel,
+                                             const void *primary_data, size_t data_size,
+                                             rmt_encode_state_t *ret_state)
 {
   rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
   rmt_encoder_handle_t bytes_encoder = led_encoder->bytes_encoder;
@@ -110,27 +112,27 @@ static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t 
   rmt_encode_state_t session_state = 0;
   rmt_encode_state_t state = 0;
   size_t encoded_symbols = 0;
-  switch (led_encoder->state) {
-  case 0: //send RGB data
+
+  if (led_encoder->state == 0) {               // send RGB data
     encoded_symbols += bytes_encoder->encode(bytes_encoder, channel, primary_data, data_size, &session_state);
     if (session_state & RMT_ENCODING_COMPLETE) {
-      led_encoder->state = 1; //switch to next state when current encoding session finished
+      led_encoder->state = 1;
     }
     if (session_state & RMT_ENCODING_MEM_FULL) {
       state |= RMT_ENCODING_MEM_FULL;
-      goto out; //yield if there's no free space for encoding artifacts
+      goto out;
     }
-  // fall-through
-  case 1: //send reset code
+  }
+  if (led_encoder->state == 1) {               // send reset code
     encoded_symbols += copy_encoder->encode(copy_encoder, channel, &led_encoder->reset_code,
                                             sizeof(led_encoder->reset_code), &session_state);
     if (session_state & RMT_ENCODING_COMPLETE) {
-      led_encoder->state = 0; //back to the initial encoding session
+      led_encoder->state = 0;
       state |= RMT_ENCODING_COMPLETE;
     }
     if (session_state & RMT_ENCODING_MEM_FULL) {
       state |= RMT_ENCODING_MEM_FULL;
-      goto out; //yield if there's no free space for encoding artifacts
+      goto out;
     }
   }
 out:
@@ -147,7 +149,7 @@ static esp_err_t rmt_del_led_strip_encoder(rmt_encoder_t *encoder)
   return ESP_OK;
 }
 //-----------------------------------------------------------
-static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder)
+static IRAM_ATTR esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder)
 {
   rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
   rmt_encoder_reset(led_encoder->bytes_encoder);
